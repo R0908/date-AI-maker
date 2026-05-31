@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Date AI Maker - Create Your Personal Date Invitation</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #ffd6e7, #fff0f6);
+    overflow-x: hidden;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+}
+
+.header h1 {
+    font-size: 32px;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.language {
+    float: right;
+    margin-bottom: 15px;
+}
+
+.language select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.screens {
+    position: relative;
+}
+
+.screen {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.screen.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Screen 1: Form */
+.screen1-content {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #222;
+    font-size: 16px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #ff4d6d;
+}
+
+.form-group input[type="date"] {
+    cursor: pointer;
+}
+
+/* Picture Grid */
+.pictures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.picture-option {
+    cursor: pointer;
+    border: 3px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.3s;
+    background: white;
+}
+
+.picture-option:hover {
+    border-color: #ff4d6d;
+    transform: scale(1.05);
+}
+
+.picture-option.selected {
+    border-color: #ff4d6d;
+    background: #ffe0e6;
+    box-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
+}
+
+.picture-emoji {
+    font-size: 50px;
+    margin-bottom: 5px;
+}
+
+.picture-name {
+    font-size: 12px;
+    color: #555;
+}
+
+/* Map */
+#map {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+    margin-top: 10px;
+    border: 2px solid #ff4d6d;
+}
+
+.map-info {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background: #ff4d6d;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #e63b57;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+}
+
+.btn-secondary {
+    background: #d9d9d9;
+    color: #222;
+}
+
+.btn-secondary:hover {
+    background: #c0c0c0;
+}
+
+/* Screen 2: Card Preview */
+.card-preview {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.card-image {
+    font-size: 100px;
+    margin: 20px 0;
+}
+
+.card-info {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.info-item {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #ff4d6d;
+}
+
+.card-content {
+    background: linear-gradient(135deg, #ffd6e7, #fff0f6);
+    padding: 40px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.card-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 20px;
+}
+
+.card-emoji {
+    font-size: 80px;
+    margin: 20px 0;
+}
+
+.card-details {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: bold;
+    color: #ff4d6d;
+}
+
+.detail-value {
+    color: #333;
+}
+
+/* Share Section */
+.share-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.share-link {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    word-break: break-all;
+    font-size: 12px;
+    color: #555;
+    margin-top: 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.share-link:hover {
+    background: #f0f0f0;
+}
+
+.error-message {
+    color: #ff4d6d;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .screen1-content,
+    .card-preview {
+        padding: 20px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .pictures-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+    from {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(120vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="language">
+    <select id="lang">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="ru">Русский</option>
+    </select>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>💑 Date AI Maker</h1>
+        <p id="headerDesc">Create your personal date invitation</p>
+    </div>
+
+    <div class="screens">
+        <!-- Screen 1: Form -->
+        <div id="screen1" class="screen active">
+            <div class="screen1-content">
+                <h2 id="formTitle" style="margin-bottom: 25px; color: #222;">Create Your Date Invitation</h2>
+
+                <div class="form-group">
+                    <label id="labelGirlName">Girl's Name</label>
+                    <input type="text" id="girlName" placeholder="Enter her name...">
+                </div>
+
+                <div class="form-group">
+                    <label id="labelDate">Choose Date</label>
+                    <input type="date" id="dateInput">
+                    <div class="error-message" id="dateError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label id="labelPlace">Choose Place on Map</label>
+                    <div id="map"></div>
+                    <div class="map-info" id="mapInfo">Click on the map to select a location</div>
+                </div>
+
+                <div class="form-group">
+                    <label id="labelCuisine">Favorite Cuisine</label>
+                    <select id="cuisineSelect">
+                        <option>Italian</option>
+                        <option>Japanese</option>
+                        <option>Spanish</option>
+                        <option>Mexican</option>
+                        <option>French</option>
+                        <option>Chinese</option>
+                        <option>Thai</option>
+                        <option>Indian</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="labelPicture">Choose Picture</label>
+                    <div class="pictures-grid" id="picturesGrid"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" id="generateBtn" onclick="generateCard()">Generate Card</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Card Preview -->
+        <div id="screen2" class="screen">
+            <div class="card-preview">
+                <h2 id="previewTitle" style="color: #222; margin-bottom: 20px;">Your Date Invitation Card</h2>
+                
+                <div class="card-content">
+                    <div id="cardEmoji" class="card-emoji"></div>
+                    
+                    <h3 id="cardName" style="font-size: 24px; color: #ff4d6d; margin: 15px 0;"></h3>
+                    
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <span class="detail-label" id="cardDateLabel">Date:</span>
+                            <span class="detail-value" id="cardDate"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label" id="cardPlaceLabel">Place:</span>
+                            <span class="detail-value" id="cardPlace"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label" id="cardCuisineLabel">Cuisine:</span>
+                            <span class="detail-value" id="cardCuisine"></span>
+                        </div>
+                    </div>
+
+                    <p id="cardMessage" style="font-size: 18px; margin-top: 20px; color: #666;"></p>
+                </div>
+
+                <div class="share-section">
+                    <h3 id="shareTitle" style="color: #222; margin-bottom: 15px;">Share Your Invitation</h3>
+                    <button class="btn-primary" id="shareBtn" onclick="shareCard()">Copy Share Link</button>
+                    <button class="btn-secondary" id="downloadBtn" onclick="downloadCard()" style="margin-left: 10px;">Download Card</button>
+                    <div class="share-link" id="shareLink"></div>
+                    <div id="shareMessage"></div>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-secondary" id="editBtn" onclick="editCard()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const translations = {
+    en: {
+        headerDesc: "Create your personal date invitation",
+        formTitle: "Create Your Date Invitation",
+        labelGirlName: "Girl's Name",
+        labelDate: "Choose Date",
+        labelPlace: "Choose Place on Map",
+        labelCuisine: "Favorite Cuisine",
+        labelPicture: "Choose Picture",
+        generateBtn: "Generate Card",
+        previewTitle: "Your Date Invitation Card",
+        cardDateLabel: "Date:",
+        cardPlaceLabel: "Place:",
+        cardCuisineLabel: "Cuisine:",
+        cardMessage: "Will you go on a date with me? 💕",
+        shareTitle: "Share Your Invitation",
+        shareBtn: "Copy Share Link",
+        downloadBtn: "Download Card",
+        editBtn: "Edit",
+        dateError: "Please select a future date",
+        selectLocation: "Click on the map to select a location",
+        locationSelected: "Location: ",
+        copied: "Link copied!",
+        placeholderGirl: "Enter her name..."
+    },
+    es: {
+        headerDesc: "Crea tu invitación personal",
+        formTitle: "Crea Tu Invitación de Cita",
+        labelGirlName: "Nombre de la Chica",
+        labelDate: "Elige una Fecha",
+        labelPlace: "Elige un Lugar",
+        labelCuisine: "Cocina Favorita",
+        labelPicture: "Elige una Imagen",
+        generateBtn: "Generar Tarjeta",
+        previewTitle: "Tu Tarjeta de Invitación",
+        cardDateLabel: "Fecha:",
+        cardPlaceLabel: "Lugar:",
+        cardCuisineLabel: "Cocina:",
+        cardMessage: "¿Quieres salir conmigo? 💕",
+        shareTitle: "Comparte Tu Invitación",
+        shareBtn: "Copiar Enlace",
+        downloadBtn: "Descargar",
+        editBtn: "Editar",
+        dateError: "Por favor, selecciona una fecha futura",
+        selectLocation: "Haz clic en el mapa para seleccionar una ubicación",
+        locationSelected: "Ubicación: ",
+        copied: "¡Enlace copiado!",
+        placeholderGirl: "Ingresa su nombre..."
+    },
+    ru: {
+        headerDesc: "Создайте личное приглашение на свидание",
+        formTitle: "Создайте Приглашение на Свидание",
+        labelGirlName: "Имя Девушки",
+        labelDate: "Выберите Дату",
+        labelPlace: "Выберите Место",
+        labelCuisine: "Любимая Кухня",
+        labelPicture: "Выберите Изображение",
+        generateBtn: "Создать Открытку",
+        previewTitle: "Ваша Открытка",
+        cardDateLabel: "Дата:",
+        cardPlaceLabel: "Место:",
+        cardCuisineLabel: "Кухня:",
+        cardMessage: "Ты пойдёшь со мной на свидание? 💕",
+        shareTitle: "Поделиться Приглашением",
+        shareBtn: "Копировать Ссылку",
+        downloadBtn: "Скачать",
+        editBtn: "Редактировать",
+        dateError: "Пожалуйста, выберите будущую дату",
+        selectLocation: "Щелкните на карте, чтобы выбрать место",
+        locationSelected: "Место: ",
+        copied: "Ссылка скопирована!",
+        placeholderGirl: "Введите её имя..."
+    }
+};
+
+const pictures = [
+    { name: "Romantic Couple", emoji: "👫" },
+    { name: "Hearts", emoji: "💕" },
+    { name: "Flowers", emoji: "🌹" },
+    { name: "Candles", emoji: "🕯️" },
+    { name: "Love Letter", emoji: "💌" },
+    { name: "Dinner", emoji: "🍽️" },
+    { name: "Wine", emoji: "🍷" },
+    { name: "Chocolate", emoji: "🍫" },
+    { name: "Sunset", emoji: "🌅" },
+    { name: "Moon", emoji: "🌙" },
+    { name: "Kissing", emoji: "😘" },
+    { name: "Ring", emoji: "💍" },
+    { name: "Gift", emoji: "🎁" },
+    { name: "Sparkles", emoji: "✨" },
+    { name: "Fire", emoji: "🔥" },
+    { name: "Angel", emoji: "😇" }
+];
+
+let currentLang = "en";
+let selectedPicture = pictures[0];
+let selectedLat = 48.8566;
+let selectedLng = 2.3522;
+let selectedPlace = "Paris, France";
+let map;
+let marker;
+let mapInitialized = false;
+
+const langSelect = document.getElementById("lang");
+langSelect.addEventListener("change", (e) => {
+    updateLanguage(e.target.value);
+});
+
+function updateLanguage(lang) {
+    currentLang = lang;
+    const t = translations[lang];
+
+    document.getElementById("headerDesc").textContent = t.headerDesc;
+    document.getElementById("formTitle").textContent = t.formTitle;
+    document.getElementById("labelGirlName").textContent = t.labelGirlName;
+    document.getElementById("labelDate").textContent = t.labelDate;
+    document.getElementById("labelPlace").textContent = t.labelPlace;
+    document.getElementById("labelCuisine").textContent = t.labelCuisine;
+    document.getElementById("labelPicture").textContent = t.labelPicture;
+    document.getElementById("generateBtn").textContent = t.generateBtn;
+    document.getElementById("previewTitle").textContent = t.previewTitle;
+    document.getElementById("cardDateLabel").textContent = t.cardDateLabel;
+    document.getElementById("cardPlaceLabel").textContent = t.cardPlaceLabel;
+    document.getElementById("cardCuisineLabel").textContent = t.cardCuisineLabel;
+    document.getElementById("cardMessage").textContent = t.cardMessage;
+    document.getElementById("shareTitle").textContent = t.shareTitle;
+    document.getElementById("shareBtn").textContent = t.shareBtn;
+    document.getElementById("downloadBtn").textContent = t.downloadBtn;
+    document.getElementById("editBtn").textContent = t.editBtn;
+    document.getElementById("mapInfo").textContent = t.selectLocation;
+    document.getElementById("girlName").placeholder = t.placeholderGirl;
+}
+
+updateLanguage("en");
+
+// Initialize picture grid
+function initPictureGrid() {
+    const grid = document.getElementById("picturesGrid");
+    grid.innerHTML = "";
+
+    pictures.forEach((pic, index) => {
+        const div = document.createElement("div");
+        div.className = "picture-option";
+        if (index === 0) div.classList.add("selected");
+        div.innerHTML = `<div class="picture-emoji">${pic.emoji}</div><div class="picture-name">${pic.name}</div>`;
+        div.onclick = () => selectPicture(index, div);
+        grid.appendChild(div);
+    });
+}
+
+function selectPicture(index, element) {
+    document.querySelectorAll(".picture-option").forEach(el => el.classList.remove("selected"));
+    element.classList.add("selected");
+    selectedPicture = pictures[index];
+}
+
+// Date picker
+const today = new Date();
+const dateInput = document.getElementById("dateInput");
+
+flatpickr(dateInput, {
+    minDate: today,
+    dateFormat: "Y-m-d",
+    defaultDate: today
+});
+
+dateInput.addEventListener("change", function() {
+    const selectedDate = new Date(this.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        document.getElementById("dateError").textContent = translations[currentLang].dateError;
+        this.value = "";
+    } else {
+        document.getElementById("dateError").textContent = "";
+    }
+});
+
+// Map initialization
+function initMap() {
+    if (mapInitialized) return;
+    mapInitialized = true;
+
+    const europeCenter = [48.8566, 2.3522];
+    
+    map = L.map("map").setView(europeCenter, 4);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 19,
+        minZoom: 2
+    }).addTo(map);
+
+    map.on("click", (e) => {
+        placeMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    placeMarker(selectedLat, selectedLng);
+}
+
+function placeMarker(lat, lng) {
+    selectedLat = lat;
+    selectedLng = lng;
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup("📍 Meeting Point")
+        .openPopup();
+
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.address) {
+                const city = data.address.city || data.address.town || data.address.village || "";
+                const country = data.address.country || "";
+                selectedPlace = city && country ? `${city}, ${country}` : country || "Selected Location";
+            } else {
+                selectedPlace = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+            document.getElementById("mapInfo").textContent = 
+                translations[currentLang].locationSelected + selectedPlace;
+        })
+        .catch(() => {
+            selectedPlace = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            document.getElementById("mapInfo").textContent = 
+                translations[currentLang].locationSelected + selectedPlace;
+        });
+}
+
+// Generate Card
+function generateCard() {
+    const girlName = document.getElementById("girlName").value.trim();
+    const date = document.getElementById("dateInput").value;
+
+    if (!girlName) {
+        alert("Please enter girl's name");
+        return;
+    }
+
+    if (!date) {
+        alert("Please select a date");
+        return;
+    }
+
+    // Format date
+    const dateObj = new Date(date);
+    const formattedDate = dateObj.toLocaleDateString(currentLang === "ru" ? "ru-RU" : currentLang === "es" ? "es-ES" : "en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+    // Update preview
+    document.getElementById("cardEmoji").textContent = selectedPicture.emoji;
+    document.getElementById("cardName").textContent = girlName;
+    document.getElementById("cardDate").textContent = formattedDate;
+    document.getElementById("cardPlace").textContent = selectedPlace;
+    document.getElementById("cardCuisine").textContent = document.getElementById("cuisineSelect").value;
+
+    // Generate share URL
+    const params = new URLSearchParams({
+        name: girlName,
+        date: date,
+        lat: selectedLat,
+        lng: selectedLng,
+        cuisine: document.getElementById("cuisineSelect").value,
+        picture: pictures.indexOf(selectedPicture)
+    });
+
+    const shareUrl = location.origin + location.pathname + "?" + params.toString();
+    document.getElementById("shareLink").textContent = shareUrl;
+
+    // Show screen 2
+    document.getElementById("screen1").classList.remove("active");
+    document.getElementById("screen2").classList.add("active");
+    
+    launchConfetti();
+}
+
+function editCard() {
+    document.getElementById("screen2").classList.remove("active");
+    document.getElementById("screen1").classList.add("active");
+}
+
+function shareCard() {
+    const shareUrl = document.getElementById("shareLink").textContent;
+    navigator.clipboard.writeText(shareUrl);
+    document.getElementById("shareMessage").textContent = translations[currentLang].copied;
+    document.getElementById("shareMessage").className = "success-message";
+    setTimeout(() => {
+        document.getElementById("shareMessage").textContent = "";
+    }, 3000);
+}
+
+function downloadCard() {
+    alert("Download feature coming soon! For now, take a screenshot.");
+}
+
+function launchConfetti() {
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * window.innerWidth + "px";
+        confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + "s";
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+// Initialize
+window.addEventListener("load", () => {
+    initPictureGrid();
+    
+    // Initialize map after a delay
+    setTimeout(() => {
+        if (document.getElementById("map")) {
+            initMap();
+        }
+    }, 500);
+
+    // Check for URL parameters
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("name")) {
+        document.getElementById("girlName").value = params.get("name");
+        document.getElementById("dateInput").value = params.get("date");
+        selectedLat = parseFloat(params.get("lat"));
+        selectedLng = parseFloat(params.get("lng"));
+        document.getElementById("cuisineSelect").value = params.get("cuisine");
+        
+        const picIndex = parseInt(params.get("picture"));
+        if (picIndex >= 0 && picIndex < pictures.length) {
+            selectedPicture = pictures[picIndex];
+        }
+
+        generateCard();
+    }
+});
+</script>
+
+</body>
+</html>
